@@ -101,8 +101,13 @@ def input_setup(index):
 
     # log transformation
     input_log = (imread(data_log[index]))
-    input_log = np.log(1 + input_log) / np.log(1+np.max(input_log))
-    # input_log = (input_log - np.min(input_log)) / (np.max(input_log) - np.min(input_log))
+    input_log = (np.log(1 + input_log) / np.log(1+np.max(input_log)))
+    for x in range(input_log.shape[0]):
+        for y in range(input_log.shape[1]):
+            if input_log[x][y] < 0:
+                input_log[x][y] = 0 
+    
+    input_log = (input_log - np.min(input_log)) / (np.max(input_log) - np.min(input_log))
     # input_log = (input_log - 127.5) / 127.5
     input_log = np.lib.pad(input_log,((padding,padding),(padding,padding)),'edge')
     w,h=input_log.shape
@@ -146,7 +151,7 @@ for idx_num in range(4,5):
       with tf.name_scope('input'):
           # changed below added images_log
           input_image_ir =tf.concat([images_ir,images_log,images_vi],axis=-1)
-          input_image_vi =tf.concat([images_vi,images_log,images_ir],axis=-1)
+          input_image_vi =tf.concat([images_vi,images_vi,images_ir],axis=-1)
 
       with tf.name_scope('fusion'):
           fusion_image=fusion_model(input_image_ir,input_image_vi)
@@ -172,9 +177,9 @@ for idx_num in range(4,5):
               if not os.path.exists(image_path):
                   os.makedirs(image_path)
               if i<=9:
-                  image_path = os.path.join(image_path,'F9_0'+str(i)+".bmp")
+                  image_path = os.path.join(image_path,'F9_0'+str(i)+"Z.jpg")
               else:
-                  image_path = os.path.join(image_path,'F9_'+str(i)+".bmp")
+                  image_path = os.path.join(image_path,'F9_'+str(i)+"_log.jpg")
               end=time.time()
               # print(out.shape)
               imsave(result, image_path)
